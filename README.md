@@ -11,7 +11,7 @@ pip install -r requirements.txt
 SECRET_KEY=<your_secret_key_without_quotes>
 DB_NAME=<your_db_name_without quotes>
 DB_USER=<your_db_user_without_quotes>
-DB_PASSWORD=<your_db_password_without_password>
+DB_PASSWORD=<your_db_password_without_quotes>
 ```
 
 ### 3. Database used is PostgreSQL, make sure you add your own credentials in the .env file
