@@ -4,6 +4,7 @@ from wallet.models import Wallet
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from .serializers import TransactionSerializer
+from django.core.exceptions import ObjectDoesNotExist
 
 class TransactionCreateAPI(generics.CreateAPIView):
     permission_classes = [
@@ -35,7 +36,23 @@ class TransactionCreateAPI(generics.CreateAPIView):
 
         return True
 
+    def is_wallet_created(self):
+        try:
+            Wallet.objects.get(owner=self.request.user)
+        except Wallet.DoesNotExist:
+            return False
+        
+        return True
+        
+
     def post(self, request, *args, **kwargs):
+        # Check if wallet is created
+        if not self.is_wallet_created():
+            return Response({
+                "message": "Wallet not created!"
+            })
+
+        # Check if we can perform the transaction
         if not self.perform_updates():
             return Response({
                 "message": "Insufficient balance!"
