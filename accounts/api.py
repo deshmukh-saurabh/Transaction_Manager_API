@@ -6,9 +6,17 @@ from django.contrib.auth.models import User
 
 # Register API
 class RegisterAPI(generics.GenericAPIView):
+    """
+    method: POST
+    route: /api/auth/register
+    summary: Used to register a user
+    """
     serializer_class = RegisterSerializer
 
     def post(self, request, *args, **kwargs):
+        """
+        Override the post method for GenericAPIView
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -19,9 +27,17 @@ class RegisterAPI(generics.GenericAPIView):
 
 # Login API
 class LoginAPI(generics.GenericAPIView):
+    """
+    method: POST
+    route: /api/auth/login
+    summary: Used to log a user in
+    """
     serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
+        """
+        Override the post method for the GenericAPIView
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
@@ -32,6 +48,11 @@ class LoginAPI(generics.GenericAPIView):
 
 # Get User API
 class UserAPI(generics.RetrieveAPIView):
+    """
+    method: GET
+    route: /api/auth/user
+    summary: Get the details for the current logged in user
+    """
     permission_classes = [
         permissions.IsAuthenticated,
     ]
@@ -43,6 +64,11 @@ class UserAPI(generics.RetrieveAPIView):
 
 # Get all Users API - needed to make a transaction to other user by username
 class GetAllUsersAPI(generics.ListAPIView):
+    """
+    method: GET
+    route: /api/auth/users
+    summary: Get all the users on the platform
+    """
     permission_classes = [
         permissions.IsAuthenticated,
     ]
