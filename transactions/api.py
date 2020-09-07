@@ -5,6 +5,7 @@ from rest_framework import generics, permissions
 from rest_framework.response import Response
 from .serializers import TransactionSerializer
 from django.core.exceptions import ObjectDoesNotExist
+from django_filters import FilterSet, AllValuesFilter, DateTimeFilter, NumberFilter
 
 class TransactionCreateAPI(generics.CreateAPIView):
     """
@@ -27,16 +28,17 @@ class TransactionCreateAPI(generics.CreateAPIView):
         """
         curr_data = self.request.data
         owner = self.request.user
-        reciever_id = User.objects.get(username=curr_data['reciever_username']).id
+        reciever_id = User.objects.get(
+            username=curr_data['reciever_username']).id
         value = int(curr_data['amount'])
 
         # Update(Decrease) sender's balance
         wallet = Wallet.objects.get(owner=owner)
         curr_balance = wallet.balance
         updated_balance = curr_balance - value
-        if(updated_balance < 0): # insufficient balance
+        if(updated_balance < 0):  # insufficient balance
             return False
-        
+
         wallet.balance = updated_balance
         wallet.save()
 
@@ -60,9 +62,8 @@ class TransactionCreateAPI(generics.CreateAPIView):
             Wallet.objects.get(owner=self.request.user)
         except Wallet.DoesNotExist:
             return False
-        
+
         return True
-        
 
     def post(self, request, *args, **kwargs):
         """
@@ -84,10 +85,37 @@ class TransactionCreateAPI(generics.CreateAPIView):
         # if the code got here, perform the transaction
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        transaction = serializer.save(owner=self.request.user, reciever=User.objects.get(username=request.data['reciever_username']))
+        transaction = serializer.save(owner=self.request.user, reciever=User.objects.get(
+            username=request.data['reciever_username']))
         return Response({
             "transaction": TransactionSerializer(transaction, context=self.get_serializer_context()).data
         })
+
+
+class TransactionFilter(FilterSet):
+    """
+    Custom filter class for /api/transactions/all
+    """
+    from_date = DateTimeFilter(
+        field_name='performed_at', lookup_expr='gte')
+    to_date = DateTimeFilter(
+        field_name='performed_at', lookup_expr='lte')
+    reciever = AllValuesFilter(
+        field_name='reciever_username')
+    max_amt = NumberFilter(
+        field_name='amount', lookup_expr='gte')
+    min_amt = NumberFilter(
+        field_name='amount', lookup_expr='lte')
+
+    class Meta:
+        model = Transaction
+        fields = (
+            'from_date',
+            'to_date',
+            'reciever',
+            'max_amt',
+            'min_amt',
+        )
 
 class TransactionDetailsAPI(generics.ListAPIView):
     """
@@ -101,6 +129,15 @@ class TransactionDetailsAPI(generics.ListAPIView):
         permissions.IsAuthenticated
     ]
     serializer_class = TransactionSerializer
-    
+    filter_class = TransactionFilter
+    search_fields = (
+        '^reciever_username',
+    )
+    ordering_fields = (
+        'reciever_username',
+        'performed_at',
+        'amount',
+    )
+
     def get_queryset(self):
         return Transaction.objects.filter(owner=self.request.user) | Transaction.objects.filter(reciever=self.request.user)

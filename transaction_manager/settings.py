@@ -43,10 +43,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # REST Framework
     'rest_framework',
+    # django-knox Authentication
     'knox',
+    # Django Filters
+    'django_filters',
+    # Transactions App
     'transactions',
+    # E-Wallet App
     'wallet',
+    # Accounts App
     'accounts',
 ]
 
@@ -55,6 +62,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS':
     'transactions.custompagination.LimitOffsetPaginationWithUpperBound',
     'PAGE_SIZE': 4,
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+        'rest_framework.filters.SearchFilter',
+    ),
 }
 
 MIDDLEWARE = [
