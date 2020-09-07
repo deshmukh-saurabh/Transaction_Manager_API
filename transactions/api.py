@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from .serializers import TransactionSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from django_filters import FilterSet, AllValuesFilter, DateTimeFilter, NumberFilter
+from rest_framework.throttling import ScopedRateThrottle
 
 class TransactionCreateAPI(generics.CreateAPIView):
     """
@@ -13,6 +14,8 @@ class TransactionCreateAPI(generics.CreateAPIView):
     route: /api/transactions/
     summary: Used for performing a transaction for a logged in user.
     """
+    throttle_scope = 'transactions'
+    throttle_classes = (ScopedRateThrottle,)
     permission_classes = [
         permissions.IsAuthenticated
     ]
@@ -96,6 +99,8 @@ class TransactionFilter(FilterSet):
     """
     Custom filter class for /api/transactions/all
     """
+    throttle_scope = 'transactions'
+    throttle_classes = (ScopedRateThrottle,)
     from_date = DateTimeFilter(
         field_name='performed_at', lookup_expr='gte')
     to_date = DateTimeFilter(
