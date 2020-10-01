@@ -1,4 +1,4 @@
-### A Transaction Manager API built using Django REST Framework, PostgreSQL
+## A Transaction Manager API built using Django REST Framework, PostgreSQL
 
 Users register and create a wallet(one per user). Transactions can then be performed from one wallet to the other.
 
